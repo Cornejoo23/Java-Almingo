@@ -12,17 +12,17 @@ public class bingo {
         
         bombo bomboObj = new bombo();
         
-        // Limpiar historial al arrancar
+        String rutaBase = "\\\\DESKTOP-K5FUK6J\\retoAlmingo-20261112T072149Z-1-001\\retoAlmingo\\src\\retoAlmingo\\";
+        
         try {
-            FileWriter limpiarHistorial = new FileWriter("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\historial.txt", false);
+            FileWriter limpiarHistorial = new FileWriter(rutaBase + "historial.txt", false);
             limpiarHistorial.write("");
             limpiarHistorial.close();
         } catch (IOException e) {
             System.out.println("Error al inicializar el historial.");
         }
         
-        // Limpiar archivo de turno previo
-        File fTurno = new File("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\turno.txt");
+        File fTurno = new File(rutaBase + "turno.txt");
         if (fTurno.exists()) {
             fTurno.delete();
         }
@@ -36,19 +36,16 @@ public class bingo {
             System.out.println("\nNumero sacado: " + bola);
             
             try {
-                // Escribir el número actual
-                FileWriter fw = new FileWriter("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\numeros.txt");
+                FileWriter fw = new FileWriter(rutaBase + "numeros.txt");
                 PrintWriter pw = new PrintWriter(fw);
                 pw.println(bola);
                 pw.close();
                 
-                // Añadir al historial
-                FileWriter fwH = new FileWriter("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\historial.txt", true);
+                FileWriter fwH = new FileWriter(rutaBase + "historial.txt", true);
                 PrintWriter pwH = new PrintWriter(fwH);
                 pwH.println(bola);
                 pwH.close();
                 
-                // Crear el archivo de turno pendiente para bloquear al servidor
                 FileWriter fwT = new FileWriter(fTurno);
                 fwT.write("ESPERANDO_JUGADOR");
                 fwT.close();
@@ -57,14 +54,24 @@ public class bingo {
                 System.out.println("Error al escribir los archivos.");
             }
             
-            System.out.println("Esperando a que el jugador elija una opcion en su turno...");
+            System.out.println("Esperando a la respuesta del jugador (o autoliberación en 5 segundos)...");
             
-            // El servidor se queda bloqueado aquí hasta que el jugador borre el archivo de turno
+            // Guardamos el momento en que empieza el turno
+            long tiempoInicio = System.currentTimeMillis();
+            
+            // Bucle de espera: comprueba si el jugador borra el turno, O si pasan 5 segundos (5000 ms)
             while (fTurno.exists()) {
-                try { Thread.sleep(1000); } catch (InterruptedException e) {}
+                long tiempoActual = System.currentTimeMillis();
+                
+                // Si pasan más de 5 segundos y el archivo sigue ahí, lo borramos a la fuerza
+                if ((tiempoActual - tiempoInicio) > 5000) {
+                    System.out.println("[AVISO] Tiempo de espera agotado. Liberando turno automáticamente...");
+                    fTurno.delete();
+                    break;
+                }
             }
             
-            System.out.println("\nTurno completado por el jugador. Presiona ENTER para la siguiente bola...");
+            System.out.println("\nTurno completado. Presiona ENTER para la siguiente bola...");
             sc.nextLine();
         }
         
