@@ -8,6 +8,8 @@ public class jugador {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         
+        String rutaBase = "\\\\DESKTOP-K5FUK6J\\retoAlmingo-20261112T072149Z-1-001\\retoAlmingo\\src\\retoAlmingo\\";
+        
         int filas = carton.fila;
         int columnas = carton.colum;
         int[][] cartonMatriz = new int[filas][columnas];
@@ -26,7 +28,7 @@ public class jugador {
             boolean leido = false;
             
             try {
-                File archivo = new File("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\numeros.txt");
+                File archivo = new File(rutaBase + "numeros.txt");
                 Scanner lector = new Scanner(archivo);
                 
                 if (lector.hasNextInt()) {
@@ -36,14 +38,15 @@ public class jugador {
                 lector.close();
                 
             } catch (FileNotFoundException e) {
-                System.out.println("Esperando a que el servidor tire una bola...");
-                try { Thread.sleep(2000); } catch (InterruptedException ex) {}
+                System.out.println("Esperando a que el servidor tire una bola... Pulsa ENTER para comprobar de nuevo.");
+                sc.nextLine();
                 continue; 
             }
             
             if (leido) {
                 if (numeroLeido == ultimoNumero) {
-                    try { Thread.sleep(1000); } catch (InterruptedException ex) {}
+                    System.out.println("El servidor todavia no ha cambiado de numero. Pulsa ENTER para comprobar otra vez...");
+                    sc.nextLine();
                     continue;
                 }
                 
@@ -95,7 +98,7 @@ public class jugador {
                     } else if (opcion == 3) {
                         boolean tachadoAlgunOlvido = false;
                         try {
-                            File fHistorial = new File("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\historial.txt");
+                            File fHistorial = new File(rutaBase + "historial.txt");
                             Scanner lectorH = new Scanner(fHistorial);
                             
                             while (lectorH.hasNextInt()) {
@@ -116,7 +119,7 @@ public class jugador {
                                 System.out.println("Revision completada. No tenias ningun numero atrasado sin tachar.");
                             }
                             
-                        } catch (FileNotFoundException e) {
+                        } catch (FileNotFoundException ex) {
                             System.out.println("No se encontro el archivo historial.txt");
                         }
                         opcionValida = true;
@@ -155,12 +158,10 @@ public class jugador {
                     }
                 }
                 
-                // Muestra siempre el cartón actualizado al terminar el turno
                 Partida.mostrarCarton(cartonMatriz, filas, columnas);
                 
-                // LIBERAR TURNO: Borramos el archivo de bloqueo para que el servidor pueda continuar
                 try {
-                    File fTurno = new File("\\\\DESKTOP-K5FUK6J\\retoAlmingo\\src\\retoAlmingo\\turno.txt");
+                    File fTurno = new File(rutaBase + "turno.txt");
                     if (fTurno.exists()) {
                         fTurno.delete();
                     }
